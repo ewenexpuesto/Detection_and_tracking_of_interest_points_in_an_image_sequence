@@ -16,16 +16,9 @@ A robot has idiothetic (himself) sources of position and motion knowledge as wel
 
 ## Edge detection
 
-The goal is to connect corners to edges.
+### Derivative methods
 
-## Corner detection
-
-
-## Blob tracking
-
-Locating and tracking the target object successfully is dependent on the algorithm. For example, using blob tracking is useful for identifying human movement because a person's profile changes dynamically.
-
-### Gaussian blurr
+#### Gaussian blurr
 
 To detect edges (borders) of images, we can blur the image and substract it to the original image. Applying a Gaussian blur is the same as convolving (convolution, "multiplication") with a Gaussian function. Since the Fourier Transform of a Gaussian is another Gaussian, applying a Gaussian blur has the effect of reducing the image's high-frequency components; a Gaussian blur is thus a low-pass-filter. In two dimensions, the Gaussian function is the product of two such Gaussian functions, one in each dimension (symetry) : $G(x,y)=\frac{1}{2\pi \sigma^2}e^{-\frac{x^2+y^2}{2\sigma^2}}$ (insert a picture of the function) where $x$ is the distance from the origin in the horizontal axis, $y$ is the distance from the origin in the vertical axis and $\sigma$ is the standard deviation of the Gaussian distribution. When applied in two dimensions, this formula produces a surface whose contours are concentric circles with a Gaussian distribution from the center point. Values from this distribution are used to build a convolution matrix which is applied to the original image. This convolution process is illustrated visually in the figure on the right. Each pixel's new
 value is set to a weighted average of that pixel's neighborhood as we can exclude all points further than $3\sigma$. The original pixel's value receives the heaviest weight (having the highest Gaussian value) and neighboring pixels receive smaller weights as their distance to the original pixel increases.
@@ -34,9 +27,11 @@ How much $\sigma$ will impact the blurred image ? A higher $\sigma$ will fade th
 
 Why use Gaussian and no other function ? Because it is circles and counts each contribution of each pixel according to its distance
 
-### Laplacian of Gaussian
+We use this method before applying each of the following methods.
 
-We then get an image $L(x,y)=g(x,y)*f(x,y)$ that is the convolution of the Gaussian with the original image. To compute the edge, you compute the Laplacian of the new image. This allows to find at which rate pixels are changing. 
+#### Laplacian of Gaussian
+
+We then get an image $L(x,y)=g(x,y)*f(x,y)$ that is the convolution of the Gaussian with the original image. To compute the edge, you compute the Laplacian of the new image. This allows to find at which rate pixels are changing.
 
 Why blurring is necessary ? Raw images contain noise, and taking second derivatives (like the Laplacian does) can amplify that noise.
 
@@ -49,23 +44,68 @@ Why ? An edge is a boundary where the image intensity changes sharply, for insta
 - Matching edges or corners could cause ambiguity : a point on one image’s edge could match many different points along the corresponding edge in another image.
 - Laplacian-based methods are more sensitive to these structures. The Laplacian is isotropic (same in all directions), so it's more suitable for rotation-invariant detection. Is it because there are circles so the second derivative is juste a constant ?
 
-### Difference of Gaussians
+#### Difference of Gaussians
 
 The method here is to subtract a Gaussian-blurred image from the original image. Blurring an image using a Gaussian kernel (that is how the function is called) is a low-passing filter, which means low intensity pixels pass more than higher ones. Indeed, the Gaussian function is an ascending function and then descending function
 
-### Determinant of the Hessian
+#### Determinant of Hessian
 
-Similar but faster
+Similar idea to the Laplacian idea. It has the advantage do be rotation-invariant.
 
-### Maximally stable extremal regions
+Then computing the determinant of the Hessian matrix for each point gives if it is an optimum and which optimum it is : 
+
+- If $\det(H)>0$ then the point is a local extremum
+- If $\det(H)<0$ the point is a saddle point
+- If $\det(H)=0$, the surface is flat, or ambiguous
+
+
+| Aspect                       | **Laplacian (LoG)**                                         | **Hessian (Determinant)**                                                  |
+| ---------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **Definition**         | Sum of second derivatives:$f_{xx} + f_{yy}$                     | Matrix of second derivatives; use determinant:$f_{xx} f_{yy} - f_{xy}^2$       |
+| **Blob measure**       | Zero-crossings or extrema of the LoG response                     | Maxima of the determinant of the Hessian                                         |
+| **Isotropy**           | Isotropic (rotation invariant by default)                         | Determinant is also rotation invariant, but captures anisotropy in structure     |
+| **Sensitivity**        | Responds to intensity changes (e.g. edges and blobs)              | Captures structure with consistent curvature in multiple directions (blobs only) |
+| **Computational Cost** | LoG is computationally simpler, especially with DoG approximation | Requires computing all second derivatives and determinant                        |
+| **Popular Use**        | Used in SIFT (via DoG), Marr-Hildreth edge detector               | Used in SURF, Hessian-based detectors (e.g. Hessian-Laplace, Hessian-Affine)     |
+
+#### The hybrid Laplacian and determinant of the Hessian operator (Hessian-Laplace)
+
+
+### Kadir–Brady saliency detector
+
+The image must first be turned into a grayscale image. The algorithm then computes the Shannon entropy around each pixel, given the size of the box around inside which it must compute. 
+
+First build a histogram of pixel intensities in this box. Then normalize it to get probabilities. Then compute the entropy. The entropy measures how diverse/uncertain the region is, that is to say how much information there is : $-\sum_i p_i \log_2 p_i$ with $p_i$ being the proportion of the $i$ pixel intensity. $\log_2 p_i$ measures the information content (or surprise) of seeing $i$ and the entropy is thus the expected information (average information).
+
+### Maximally stable extremal regions : accentuate contrast
 
 Every pixel is put in a class according to if it fits in a certain threshold. This way the image is cut in 2 groups. It is very lightweight. If $n$ is the number of pixels, the process might take a different amount of time. Using binary sort, it would take $O(n)$.
+
+For some use cases, it is possible to divide the image in a grid and then compute local thresholding
 
 Note that for colors and not for grayscale, we use agglomerative clustering using colour gradients. Often referred to as a "bottom-up" approach, begins with each data point as an individual cluster. At each step, the algorithm merges the two most similar clusters based on a chosen distance metric (e.g., Euclidean distance) and linkage criterion (e.g., single-linkage,
 complete-linkage). This process continues until all data points are combined into a single cluster or a stopping criterion is met. Agglomerative methods are more commonly used due to their simplicity and computational efficiency for small to medium-sized datasets. In constrast, there is a divisive clustering, known as a "top-down" approach, starts with all
 data points in a single cluster and recursively splits the cluster into smaller ones. It is a greedy algorithm : it makes a series of locally optimal choices without reconsidering previous steps.
 
 It is possible to try other types of clustering methods like k-means, BIRCH or CURE.
+
+### Difference between bilinear and nearest neighbour resampling
+
+Substracting the bilinear-rescaled image from the nearest-neighbour-resampled image can outline the borders. See for proof : https://github.com/ewenexpuesto/Image-manipulation-and-filters-with-C/blob/main/final_project/images/Lenna_color_difference.ppm
+
+But it is less efficient than Gaussian difference
+
+## Corner detection
+
+The goal is to connect corners to edges.
+
+Detecting corners : corners are the intersection of edges
+
+## Blob detection
+
+Locating and tracking the target object successfully is dependent on the algorithm. For example, using blob tracking is useful for identifying human movement because a person's profile changes dynamically.
+
+Laplacian of Gaussian, Difference of Gaussians and Determinant of Hessian allow to detect blobs
 
 ## Kanade-Lucas-Tomasi (KLT) Tracker
 
@@ -88,8 +128,6 @@ https://www.cs.cmu.edu/~16385/s17/Slides/15.1_Tracking__KLT.pdf
 The goal is to optimize a kernel in a learning process. In our case, we must take a pre-trained one.
 
 ### Region-based convolutional neural networks
-
-
 
 **Why not combine both worlds ? Also use image segmentation ? Compare all methods and do benchmarks**
 
@@ -127,7 +165,6 @@ Why is it scale-invariant ? Because if we zoom it works the same ?
 
 ### Speeded up robust features
 
-
 ### Condensation (conditional density propagation) algorithm
 
 It is a probabilistic algorithm. Each pixel is not studied. Instead pixels are chosen randomly. The algorithm’s creation was inspired by the inability of Kalman filtering to perform object tracking well in the presence of significant background clutter.  The presence of clutter tends to produce probability distributions for the object state which are multi-modal and therefore poorly modeled by the Kalman filter.  The condensation algorithm in its most general form requires no assumptions about the probability distributions of the object or measurements.
@@ -163,7 +200,6 @@ It is often challenging to extract segmentation masks of a target/object from a 
 First is to segment the image through superpixels. The number of clusters must not be specified, but ideally optimized. In the beginning there are a certain number of clusters which form a grid (https://www.youtube.com/watch?v=zx1CthO5FEk) and then it grows
 
 Then to ensure consistency between frames, labels must stay consistent. For that, each class from each image must be added to a graph that according to its form/colours/overall appearance so that we have a graph with cliques. https://www.youtube.com/watch?v=TdRYcZ2xUSM
-
 
 # Limits
 
