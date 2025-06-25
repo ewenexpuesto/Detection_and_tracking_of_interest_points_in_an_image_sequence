@@ -1,4 +1,5 @@
+input_videos/*
+output_videos/*
 output_frames/
-output_videos/
-sources/
+src/__pycache__/
 tracked_output.avi

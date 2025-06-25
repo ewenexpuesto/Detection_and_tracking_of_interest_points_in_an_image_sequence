@@ -1,8 +1,11 @@
 # Detection and tracking of interest points in an image sequence
 
-## Prerequisite
+## Goals
 
-No human intervention at all
+Build two types of detection and tracking :
+
+- One where a human operator points at a point of interest which must be a well-chosen corner that need to be followed and then the program follows it
+- One that detects points of interest and follows them automatically
 
 ## Object detection, finding points of interest, feature extraction
 
