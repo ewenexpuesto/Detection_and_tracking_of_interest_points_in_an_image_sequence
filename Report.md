@@ -1,10 +1,12 @@
-# Detection and tracking of interest points in an image sequence
+Detection and tracking of interest points in an image sequence
 
 **Prerequisite : no human intervention at all**
 
+---
+
 # Object detection, finding points of interest, feature extraction
 
-https://en.wikipedia.org/wiki/Feature_(computer_vision)
+[Feature (wikipedia)](https://en.wikipedia.org/wiki/Feature_(computer_vision))
 
 SLAM (*simultaneous localization and mapping*) : mapping the environnement relatively to an agent and finding where it is in this environnement. It is used in robot navigation and virtual reality using motion sensors. SLAM encompasses different algorithms. **Here we only have images and videos** and we don't study the robot's position, only the eternal world. *Library : Mobile Robot Programming Toolkit in C++*.
 
@@ -35,13 +37,13 @@ We then get an image $L(x,y)=g(x,y)*f(x,y)$ that is the convolution of the Gauss
 
 Why blurring is necessary ? Raw images contain noise, and taking second derivatives (like the Laplacian does) can amplify that noise.
 
-Why not use Jacobian (first derivative of speed) ? The Laplacian detects where the gradient peaks or changes sign (i.e., zero-crossings), which often correspond to actual edges. First derivatives tell you “there’s change here.” Second derivatives tell you “there’s a peak, valley, or blob here.” For feature detection (like in SIFT, which is about finding the "global leading" gradient, Jacobian here), you want interest points, not just edges.
+Why not use Jacobian (first derivative of speed) ? The Laplacian detects where the gradient peaks or changes sign (i.e., zero-crossings), which often correspond to actual edges. First derivatives tell you "there's change here." Second derivatives tell you "there's a peak, valley, or blob here." For feature detection (like in SIFT, which is about finding the "global leading" gradient, Jacobian here), you want interest points, not just edges.
 
 Why ? An edge is a boundary where the image intensity changes sharply, for instance the border of an object, but edges are full of many indistinctive points, and we want later to be able to follow remarquable points between images, for instance corners, which are the intersection of two edges
 
-- Edges are not unique enough because on an edge, there's no information in one direction. Imagine trying to identify a location in a desert where the only feature is a straight fence : it’s easy to say “I'm next to the fence,” but hard to say where along the fence. No landmark to help localize.
+- Edges are not unique enough because on an edge, there's no information in one direction. Imagine trying to identify a location in a desert where the only feature is a straight fence : it's easy to say "I'm next to the fence", but hard to say where along the fence. No landmark to help localize.
 - Edges are too sensitive to small noise. Edges are detected using first derivatives (gradients, Jacobian), which are sensitive to tiny intensity changes. Even a small variation in brightness, noise, or image compression can change where or whether an edge is detected. While the second derivative (Laplacian) is more stable and detects corners by definition.
-- Matching edges or corners could cause ambiguity : a point on one image’s edge could match many different points along the corresponding edge in another image.
+- Matching edges or corners could cause ambiguity : a point on one image's edge could match many different points along the corresponding edge in another image.
 - Laplacian-based methods are more sensitive to these structures. The Laplacian is isotropic (same in all directions), so it's more suitable for rotation-invariant detection. Is it because there are circles so the second derivative is juste a constant ?
 
 #### Difference of Gaussians
@@ -52,12 +54,11 @@ The method here is to subtract a Gaussian-blurred image from the original image.
 
 Similar idea to the Laplacian idea. It has the advantage do be rotation-invariant.
 
-Then computing the determinant of the Hessian matrix for each point gives if it is an optimum and which optimum it is : 
+Then computing the determinant of the Hessian matrix for each point gives if it is an optimum and which optimum it is :
 
 - If $\det(H)>0$ then the point is a local extremum
 - If $\det(H)<0$ the point is a saddle point
 - If $\det(H)=0$, the surface is flat, or ambiguous
-
 
 | Aspect                       | **Laplacian (LoG)**                                         | **Hessian (Determinant)**                                                  |
 | ---------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------- |
@@ -70,10 +71,9 @@ Then computing the determinant of the Hessian matrix for each point gives if it 
 
 #### The hybrid Laplacian and determinant of the Hessian operator (Hessian-Laplace)
 
-
 ### Kadir–Brady saliency detector
 
-The image must first be turned into a grayscale image. The algorithm then computes the Shannon entropy around each pixel, given the size of the box around inside which it must compute. 
+The image must first be turned into a grayscale image. The algorithm then computes the Shannon entropy around each pixel, given the size of the box around inside which it must compute.
 
 First build a histogram of pixel intensities in this box. Then normalize it to get probabilities. Then compute the entropy. The entropy measures how diverse/uncertain the region is, that is to say how much information there is : $-\sum_i p_i \log_2 p_i$ with $p_i$ being the proportion of the $i$ pixel intensity. $\log_2 p_i$ measures the information content (or surprise) of seeing $i$ and the entropy is thus the expected information (average information).
 
@@ -91,7 +91,7 @@ It is possible to try other types of clustering methods like k-means, BIRCH or C
 
 ### Difference between bilinear and nearest neighbour resampling
 
-Substracting the bilinear-rescaled image from the nearest-neighbour-resampled image can outline the borders. See for proof : https://github.com/ewenexpuesto/Image-manipulation-and-filters-with-C/blob/main/final_project/images/Lenna_color_difference.ppm
+Substracting the bilinear-rescaled image from the nearest-neighbour-resampled image can outline the borders. See for [proof](https://github.com/ewenexpuesto/Image-manipulation-and-filters-with-C/blob/main/final_project/images/Lenna_color_difference.ppm)
 
 But it is less efficient than Gaussian difference
 
