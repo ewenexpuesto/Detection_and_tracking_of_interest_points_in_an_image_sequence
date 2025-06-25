@@ -1,4 +1,4 @@
-# Detection_and_tracking_of_interest_points_in_an_image_sequence
+# Detection and tracking of interest points in an image sequence
 
 ## What is inside
 
