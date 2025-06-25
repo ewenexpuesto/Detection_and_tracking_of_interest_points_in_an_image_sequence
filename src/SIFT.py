@@ -1,99 +1,97 @@
 import cv2
 import numpy as np
-import os
+from numpy.typing import NDArray
+import video_processing
+import difference_of_gaussians
 
-def track_objects_with_stif(video_path: str, output_path: str = "tracked_output.avi"):
-    cap = cv2.VideoCapture(video_path)
+def SIFT_list_of_arrays(frames: list[NDArray[np.uint8]]) -> list[NDArray[np.uint8]]:
+    """
+    Detects and tracks SIFT keypoints across a list of video frames using optical flow.
 
-    feature_params = dict(maxCorners=30,
-                          qualityLevel=0.5,
-                          minDistance=10,
-                          blockSize=7)
+    Parameters
+    ----------
+    frames : list of np.ndarray
+        List of BGR frames (NumPy arrays).
 
-    lk_params = dict(winSize=(15, 15),
-                     maxLevel=2,
-                     criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+    Returns
+    -------
+    output_frames : list of np.ndarray
+        Frames with tracked keypoints visualized.
+    """
+    if len(frames) == 0:
+        return []
 
-    ret, old_frame = cap.read()
-    if not ret:
-        raise ValueError("Failed to read video")
+    sift = cv2.SIFT_create(contrastThreshold=0.07, edgeThreshold=10)
+    output_frames = []
 
-    old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
+    # First frame SIFT detection
+    prev_gray = cv2.cvtColor(frames[0], cv2.COLOR_BGR2GRAY)
+    keypoints, _ = sift.detectAndCompute(prev_gray, None)
 
-    brightness_mask = np.zeros_like(old_gray)
-    brightness_mask[old_gray > 30] = 255
+    if not keypoints:
+        # No keypoints found, return original frames
+        return frames
 
-    edges = cv2.Canny(old_gray, threshold1=50, threshold2=150)
-    combined_mask = cv2.bitwise_and(edges, brightness_mask)
+    prev_pts = np.array([kp.pt for kp in keypoints], dtype=np.float32).reshape(-1, 1, 2)
 
-    p0 = cv2.goodFeaturesToTrack(old_gray, mask=combined_mask, **feature_params)
+    # Draw first frame keypoints
+    first_frame_with_kp = cv2.drawKeypoints(frames[0], keypoints, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    output_frames.append(first_frame_with_kp)
 
-    mask = np.zeros_like(old_frame)
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    height, width = old_frame.shape[:2]
-    out = cv2.VideoWriter(output_path, fourcc, cap.get(cv2.CAP_PROP_FPS), (width, height))
+    for i in range(1, len(frames)):
+        curr_frame = frames[i]
+        curr_gray = cv2.cvtColor(curr_frame, cv2.COLOR_BGR2GRAY)
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
+        if prev_pts is None or len(prev_pts) == 0:
+            output_frames.append(curr_frame.copy())
+            continue
 
-        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        edges = cv2.Canny(frame_gray, threshold1=50, threshold2=150)  # current frame's edge map
+        # Optical flow tracking
+        next_pts, status, _ = cv2.calcOpticalFlowPyrLK(prev_gray, curr_gray, prev_pts, None)
 
-        if p0 is not None:
-            p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
+        if next_pts is None or status is None:
+            output_frames.append(curr_frame.copy())
+            continue
 
-            if p1 is not None and st is not None:
-                good_new = p1[st == 1]
-                good_old = p0[st == 1]
+        good_pts = next_pts[status.flatten() == 1]
 
-                for (new, old) in zip(good_new, good_old):
-                    a, b = new.ravel()
-                    c, d = old.ravel()
+        frame_with_kp = curr_frame.copy()
+        for pt in good_pts:
+            x, y = pt.ravel()
+            cv2.circle(frame_with_kp, (int(x), int(y)), 3, (0, 255, 0), -1)
 
-                    # Draw motion trail
-                    mask = cv2.line(mask, (int(a), int(b)), (int(c), int(d)), color=(0, 255, 0), thickness=2)
+        output_frames.append(frame_with_kp)
 
-                    # Draw corner point
-                    frame = cv2.circle(frame, (int(a), int(b)), 3, color=(0, 0, 255), thickness=-1)
+        # Prepare for next frame
+        prev_gray = curr_gray
+        prev_pts = good_pts.reshape(-1, 1, 2)
 
-                    # --- NEW: follow edges in local patch ---
-                    x, y = int(a), int(b)
-                    patch_size = 15
-                    half = patch_size // 2
-                    x1, y1 = max(x - half, 0), max(y - half, 0)
-                    x2, y2 = min(x + half, width), min(y + half, height)
+    return output_frames
 
-                    edge_patch = edges[y1:y2, x1:x2]
-                    edge_coords = cv2.findNonZero(edge_patch)
-                    if edge_coords is not None:
-                        for pt in edge_coords:
-                            ex, ey = pt[0][0] + x1, pt[0][1] + y1
-                            frame = cv2.circle(frame, (ex, ey), 1, (255, 255, 0), -1)  # Cyan edge dot
+def SIFT_difference_of_gaussians_mp4(input_video_path: str, output_video_path: str, video_name: str, kernel_size: int, sigma1: float, sigma2: float) -> None:
+    """
+    Detects and tracks SIFT keypoints across frames of a video after processing it with difference of gaussians and writes the result to a new video file.
 
-                output = cv2.add(frame, mask)
-                p0 = good_new.reshape(-1, 1, 2)
-            else:
-                output = frame
-                p0 = None
-        else:
-            output = frame
-            brightness_mask = np.zeros_like(frame_gray)
-            brightness_mask[frame_gray > 30] = 255
-            edges = cv2.Canny(frame_gray, 50, 150)
-            combined_mask = cv2.bitwise_and(edges, brightness_mask)
-            p0 = cv2.goodFeaturesToTrack(frame_gray, mask=combined_mask, **feature_params)
+    Parameters
+    ----------
+    input_video_path : str
+        Path to the input video file.
+    output_video_path : str
+        Path to the folder to save the output video file.
+    video_name : str
+        Name of the output video file (must include the extension).
+    kernel_size : int
+        Size of the Gaussian kernel (must be odd).
+    sigma1 : float
+        Sigma for the first (smaller) Gaussian blur.
+    sigma2 : float
+        Sigma for the second (larger) Gaussian blur.
+    """
 
-        out.write(output)
-        old_gray = frame_gray.copy()
-
-    cap.release()
-    out.release()
-    cv2.destroyAllWindows()
-    print(f"Tracking video saved to {output_path}")
-
-# Example usage
-video_path = "output_videos/video_sample_1.mp4"
-output_path = "tracked_output.avi"
-track_objects_with_stif(video_path, output_path)
+    frames, fps = video_processing.mp4_to_list_of_arrays(input_video_path)
+    dog_frames = difference_of_gaussians.difference_of_gaussians_list_of_arrays(frames, kernel_size, sigma1, sigma2)
+    output_frames = SIFT_list_of_arrays(dog_frames)
+    # linear strech colors for each frame
+    for i in range(len(output_frames)):
+        output_frames[i] = cv2.normalize(output_frames[i], None, 0, 255, cv2.NORM_MINMAX)
+    video_processing.list_of_arrays_to_mp4(output_frames, output_video_path, video_name=video_name, fps=fps)

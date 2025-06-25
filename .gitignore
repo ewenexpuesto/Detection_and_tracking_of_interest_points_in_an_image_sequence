@@ -1,5 +1,9 @@
 input_videos/*
+!input_videos/video_sample_1-uhd_3840_2160_25fps.mp4
 output_videos/*
+!output_videos/video_sample_tracked_14_SIFT_0.07_10_and_optical_flow.mp4
 output_frames/
 src/__pycache__/
+
 tracked_output.avi
+todo.md

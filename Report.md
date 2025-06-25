@@ -164,6 +164,10 @@ To achieve motion detection, we need to find correspondence between images, whic
 
 Why is it scale-invariant ? Because if we zoom it works the same ?
 
+[SIFT](https://www.youtube.com/watch?v=4AvTMVD9ig0)
+
+[SIFT2](https://www.youtube.com/watch?v=ram-jbLJjFg)
+
 #### Speeded up robust features
 
 #### Condensation (conditional density propagation) algorithm
