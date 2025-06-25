@@ -1,6 +1,7 @@
 import cv2
 import os
 import numpy as np
+from numpy.typing import NDArray
 
 def video_to_frames_write(video_path, output_folder):
     """
@@ -87,17 +88,25 @@ def video_to_frame_arrays(video_path):
 
 def frames_array_to_video_write(frames, folder_path, video_name="output.mp4", fps=30):
     """
-    Takes a list of NumPy array frames and saves them as a video in the specified folder.
+    Writes a list of video frames (NumPy arrays) to a video file in the specified folder.
 
-    Parameters:
-    - frames (List[np.ndarray]): List of video frames (NumPy arrays in BGR format).
-    - folder_path (str): Path to the folder where the video will be saved.
-    - video_name (str): Output video filename (default: "output.mp4").
-    - fps (int): Frames per second for the output video (default: 30).
+    Parameters
+    ----------
+    frames : list of np.ndarray
+        List of video frames in BGR format.
+    folder_path : str
+        Path to the folder where the video file will be saved.
+    video_name : str, optional
+        Name of the output video file (default is "output.mp4").
+    fps : int, optional
+        Frames per second of the output video (default is 30).
 
-    Returns:
-    - str: Path to the saved video file.
+    Returns
+    -------
+    str
+        Full path to the saved video file.
     """
+
     if not frames:
         raise ValueError("The frame list is empty.")
 
@@ -126,16 +135,22 @@ def frames_array_to_video_write(frames, folder_path, video_name="output.mp4", fp
 
 def save_frames_array(frames: list[np.ndarray], folder_path: str, prefix: str = "frame"):
     """
-    Saves a list of grayscale or BGR frames (NumPy arrays) as images named
-    frame_000.jpg, frame_001.jpg, ... in a single specified folder.
+    Saves a list of grayscale or BGR image frames as individual image files
+    named like 'frame_000.jpg', 'frame_001.jpg', etc., in a specified folder.
 
-    Parameters:
-    - frames (list of np.ndarray): List of image arrays to save.
-    - folder_path (str): Path to the folder where images will be saved.
-    - prefix (str): Filename prefix (default: "frame").
+    Parameters
+    ----------
+    frames : list of np.ndarray
+        List of image arrays (grayscale or BGR) to be saved.
+    folder_path : str
+        Path to the output folder where images will be stored.
+    prefix : str, optional
+        Prefix for the output filenames (default is "frame").
 
-    Returns:
-    - list of str: List of saved image file paths.
+    Returns
+    -------
+    list of str
+        List of full file paths to the saved image files.
     """
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -157,17 +172,24 @@ def save_frames_array(frames: list[np.ndarray], folder_path: str, prefix: str = 
     
     return saved_paths
 
-def stretch_colors(frame: np.ndarray):
+def linear_stretch_colors(frame: NDArray[np.uint8]) -> NDArray[np.uint8]:
     """
-    Stretch the colors in the input frame from min color to max color.
-    Scales pixel values linearly so min maps to 0 and max maps to 255.
+    Linearly stretches pixel intensities in the input image so that the
+    minimum value becomes 0 and the maximum becomes 255.
 
-    Args:
-        frame (np.ndarray): Input image/frame (H x W x C) or (H x W).
+    This enhances contrast by mapping the full input range to [0, 255].
 
-    Returns:
-        np.ndarray: Color-stretched image/frame with dtype=np.uint8.
+    Parameters
+    ----------
+    frame : np.ndarray
+        Input image array, either 2D (grayscale) or 3D (color).
+
+    Returns
+    -------
+    stretched_uint8 : np.ndarray
+        Output image with pixel values scaled to [0, 255] and dtype uint8.
     """
+
     # Convert to float for computation to avoid overflow
     frame_float = frame.astype(np.float32)
 
@@ -188,20 +210,22 @@ def stretch_colors(frame: np.ndarray):
 
     return stretched_uint8
 
-import numpy as np
-
-def stretch_colors_to_black_and_white(frame: np.ndarray):
+def extreme_stretch_colors(frame: NDArray[np.uint8]) -> NDArray[np.uint8]:
     """
-    Convert grayscale frame so that all non-black pixels become white (255),
-    and black pixels remain 0.
+    Converts an image so all non-zero pixels become 255 and black remain 0. All pixels are then either pure red, green, blue or any combination of them, including back and white.
 
-    Args:
-        frame (np.ndarray): Input grayscale frame (2D).
+    Parameters
+    ----------
+    frame : NDArray[np.uint8]
+        Input 2D image.
 
-    Returns:
-        np.ndarray: Binary black-and-white image with dtype uint8.
+    Returns
+    -------
+    bw_frame : NDArray[np.uint8]
+        Binary image with 0 or 255.
     """
-    # First, stretch the colors as before to normalize intensity
+
+    # Convert to float for computation to avoid overflow
     frame_float = frame.astype(np.float32)
     min_val = frame_float.min()
     max_val = frame_float.max()
