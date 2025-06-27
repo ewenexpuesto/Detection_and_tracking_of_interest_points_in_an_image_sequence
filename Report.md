@@ -114,9 +114,11 @@ Laplacian of Gaussian, Difference of Gaussians and Determinant of Hessian allow 
 
 [Lucas-Kanade feature tracker wikipedia](https://en.wikipedia.org/wiki/Kanade%E2%80%93Lucas%E2%80%93Tomasi_feature_tracker)
 
-#### Tomasi-Kanade
+#### Shi-Tomasi corner detector
 
 Method for choosing the best feature (image patch) for tracking
+
+It is an improvement over Harris corner detector
 
 #### Lucas-Kanade
 
@@ -160,9 +162,17 @@ The goal is to minimize an error function that corresponds the move of blocks be
 
 #### Scale-invariant feature transform
 
-To achieve motion detection, we need to find correspondence between images, which refers to the problem of ascertaining which parts of one image correspond to which parts of another image, where differences are due to **movement of the camera**, the **elapse of time**, and/or **movement of objects in the photos**. We use SIFT (scale-invariant feature transform). The first step in SIFT is finding a dominant gradient direction of the points of interest we found. SIFT builds a histogram of gradient directions weighted by their magnitude. The peak(s) in this histogram represent the dominant orientation(s) of that keypoint’s local patch. To make it rotation-invariant (if the camera rotates), you can describe keypoints relative to their dominant orientation: once the dominant gradient direction is found, SIFT rotates the coordinate system of the descriptor to align with this orientation. This means the feature descriptor is always “normalized” to this orientation before comparing with others.
+To achieve motion detection, we need to find correspondence between images, which refers to the problem of ascertaining which parts of one image correspond to which parts of another image, where differences are due to **movement of the camera**, the **elapse of time**, and/or **movement of objects in the photos**. We use SIFT (scale-invariant feature transform). The first step in SIFT is finding a dominant gradient direction of the points of interest we found. SIFT builds a histogram of gradient directions weighted by their magnitude. The peak(s) in this histogram represent the dominant orientation(s) of that keypoiny's local patch. To make it rotation-invariant (if the camera rotates), you can describe keypoints relative to their dominant orientation: once the dominant gradient direction is found, SIFT rotates the coordinate system of the descriptor to align with this orientation. This means the feature descriptor is always "normalized" to this orientation before comparing with others.
 
-Why is it scale-invariant ? Because if we zoom it works the same ?
+Why is it scale-invariant ? Because if we zoom it works the same ? Yes.
+
+It works but we have to search for a lot of features for it to work. It doesn't seem to look for differences in images as expected but instead look at features image per image.
+
+[Source originale](https://www.ipol.im/pub/art/2014/82/?utm_source=doi)
+
+[SIFT](https://www.youtube.com/watch?v=4AvTMVD9ig0)
+
+[SIFT2](https://www.youtube.com/watch?v=ram-jbLJjFg)
 
 #### Speeded up robust features
 
@@ -201,6 +211,10 @@ It is often challenging to extract segmentation masks of a target/object from a 
 First is to segment the image through superpixels. The number of clusters must not be specified, but ideally optimized. In the beginning there are a certain number of clusters which form a grid ([Grid of clusters](https://www.youtube.com/watch?v=zx1CthO5FEk)) and then it grows
 
 Then to ensure consistency between frames, labels must stay consistent. For that, each class from each image must be added to a graph that according to its form/colours/overall appearance so that we have a graph with cliques. [Graph and cliques](https://www.youtube.com/watch?v=TdRYcZ2xUSM)
+
+## Focus
+
+Where to focus attention where it is the most important ?
 
 ## Limits
 
