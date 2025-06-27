@@ -255,3 +255,50 @@ def extreme_stretch_colors(frame: NDArray[np.uint8]) -> NDArray[np.uint8]:
     bw_frame = np.where(stretched_uint8 > 0, 255, 0).astype(np.uint8)
 
     return bw_frame
+
+def keep_only_color_list_of_arrays(
+    frames: list[NDArray[np.uint8]],
+    target_bgr: tuple[int, int, int],
+    tolerance: int = 40
+) -> list[NDArray[np.uint8]]:
+    """
+    Keeps only pixels close to a specific BGR color, turning others black.
+
+    Parameters
+    ----------
+    frames : list of np.ndarray
+        List of BGR video frames.
+    target_bgr : tuple
+        The BGR color to preserve (e.g., (0, 0, 255) for red).
+    tolerance : int
+        Maximum allowed color distance for a pixel to be preserved.
+
+    Returns
+    -------
+    output_frames : list of np.ndarray
+        Frames with only the specified color preserved.
+    """
+    output_frames = []
+    total_frames = len(frames)
+    target_bgr = np.array(target_bgr, dtype=np.uint8)
+
+    for i, frame in enumerate(frames):
+        # Compute color distance per pixel
+        diff = cv2.absdiff(frame, target_bgr)
+        dist = np.linalg.norm(diff, axis=2)
+
+        # Create mask where color is close to target
+        mask = dist < tolerance
+
+        # Initialize black output
+        result = np.zeros_like(frame)
+        result[mask] = frame[mask]
+
+        output_frames.append(result)
+
+        # Progress display
+        progress = (i + 1) / total_frames * 100
+        print(f"Keep Only Color: Frame {i + 1}/{total_frames} ({progress:.1f}%)", end='\r')
+
+    print()
+    return output_frames

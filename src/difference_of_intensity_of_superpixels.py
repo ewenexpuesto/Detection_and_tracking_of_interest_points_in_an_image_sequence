@@ -70,7 +70,7 @@ def difference_of_intensity_of_superpixels_list_of_arrays(frames: NDArray[np.uin
                 
                 if intensity_diff > threshold:
                     # Color superpixel in bright green
-                    output_frame[y:y_end, x:x_end] = [0, 255, 0]  # Bright green in RGB
+                    output_frame[y:y_end, x:x_end] = [255, 0, 0]
         
         processed_frames.append(output_frame)
     
@@ -103,7 +103,7 @@ def difference_of_intensity_superpixels_matrix(
     p : float
         Superpixel size ratio (0 < p < 1).
     t : float
-        Threshold ratio for detecting motion.
+        Threshold ratio for detecting motion (0 < t < 1). Higher means less detection.
 
     Returns
     -------
@@ -154,9 +154,9 @@ def difference_of_intensity_superpixels_matrix(
         # Create mask per pixel using changed block IDs
         changed_mask = changed_blocks[block_id_flat].reshape(h, w)
 
-        # Generate output frame: green if change detected, else original
+        # Generate output frame: red if change detected, else original
         out_frame = frames[i].copy()
-        out_frame[changed_mask] = [0, 255, 0]
+        out_frame[changed_mask] = [0, 0, 255]
 
         processed_frames.append(out_frame)
 

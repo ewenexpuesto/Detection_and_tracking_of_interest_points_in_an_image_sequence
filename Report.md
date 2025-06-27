@@ -15,7 +15,7 @@ SLAM (*simultaneous localization and mapping*) : mapping the environnement relat
 
 SLAM with DATMO is a model which tracks moving objects in a similar way to the agent itself.
 
-A robot has idiothetic (himself) sources of position and motion knowledge as well as allothetic (others) sources. **We are only studying allothetic images sources**. Our program takes as input a video. **The goal is to follow the objects present on the video**.
+A robot has idiothetic (himself) sources of position and motion knowledge as well as allothetic (others) sources. **We are only studying allothetic images sources**. Our program takes as input a video. **The goal here is to follow the objects present on the video**.
 
 ### Edge detection
 
@@ -108,7 +108,7 @@ Locating and tracking the target object successfully is dependent on the algorit
 
 Laplacian of Gaussian, Difference of Gaussians and Determinant of Hessian allow to detect blobs
 
-### Kanade-Lucas-Tomasi (KLT) Tracker
+### Kanade-Lucas-Tomasi (KLT) Tracker : ST corner detection + LK optical flow
 
 [Lucas-Kanade feature tracker](https://rpg.ifi.uzh.ch/docs/teaching/2020/11_tracking.pdf)
 

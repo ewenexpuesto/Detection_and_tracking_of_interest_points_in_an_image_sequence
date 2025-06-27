@@ -39,11 +39,11 @@ def difference_of_gaussians_list_of_arrays(video: list[NDArray[np.uint8]], kerne
     video : list of np.ndarray
         List of video frames. Each frame is a 3D NumPy array (height, width, channels).
     kernel_size : int
-        Size of the Gaussian kernel (must be odd).
+        Size of the Gaussian kernel (must be odd). Higher means broader features (blobs). Lower means finer details.
     sigma1 : float
         Sigma for the first (smaller) Gaussian blur.
     sigma2 : float
-        Sigma for the second (larger) Gaussian blur.
+        Sigma for the second (larger) Gaussian blur. Higher means broader features (blobs). Lower means finer details.
 
     Returns
     -------
