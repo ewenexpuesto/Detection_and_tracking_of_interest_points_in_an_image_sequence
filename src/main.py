@@ -1,19 +1,24 @@
 import video_processing
 import gaussian_blur
 import difference_of_gaussians
+import SIFT
+import difference_of_intensity_of_superpixels
+import ST_corner_detection_and_LK_optical_flow
+import activity_detection
 
-input_path = "input_videos/video_sample_1-uhd_3840_2160_25fps.mp4"
-kernel_size = 0
-sigma1 = 0.1
-sigma2 = 1.0
-output_path = "output_videos"
-output_path_frames = "output_frames"
+input_path = "input_videos/video_sample_4-1080p.mp4"
+output_folder = "output_videos"
+video_name = "4_difference_of_intensity_of_superpixels_matrix_0.002_0.35.mp4"
+output_path = output_folder+"/"+video_name
 
-video_array = video_processing.video_to_frame_arrays(input_path)
-list_of_frames = []
-for i, frame in enumerate(video_array):
-    dog_frame = difference_of_gaussians.compute_difference_of_gaussians(frame, kernel_size, sigma1, sigma2)
-    dog_frame = video_processing.stretch_colors_to_black_and_white(dog_frame) # This takes more time
-    list_of_frames.append(dog_frame)
-video_processing.save_frames_array(list_of_frames, output_path_frames, prefix="frame")
-video_processing.frames_array_to_video_write(list_of_frames, output_path, video_name="video_sample_1.mp4", fps=25)
+kernel_size = 5
+sigma1 = 1
+sigma2 = 2
+
+# frames, fps = video_processing.mp4_to_list_of_arrays(input_path)
+# frames_processed = ST_corner_detection_and_LK_optical_flow.process_optical_flow(frames)
+# video_processing.list_of_arrays_to_mp4(frames_processed, output_folder, video_name, fps)
+
+frames, fps = video_processing.mp4_to_list_of_arrays(input_path)
+frames_processed = difference_of_intensity_of_superpixels.difference_of_intensity_superpixels_matrix(frames, 0.002, 0.35)
+video_processing.list_of_arrays_to_mp4(frames_processed, output_folder, video_name, fps)

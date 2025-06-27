@@ -1,5 +1,5 @@
 input_videos/*
 output_videos/*
+!output_videos/4_difference_of_intensity_of_superpixels_matrix_0.002_0.25.mp4
 output_frames/
 src/__pycache__/
-tracked_output.avi
