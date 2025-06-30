@@ -69,7 +69,7 @@ def difference_of_intensity_of_superpixels_list_of_arrays(frames: NDArray[np.uin
                 intensity_diff = abs(next_mean - current_mean)
                 
                 if intensity_diff > threshold:
-                    # Color superpixel in bright green
+                    # Color superpixel in bright red
                     output_frame[y:y_end, x:x_end] = [255, 0, 0]
         
         processed_frames.append(output_frame)

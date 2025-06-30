@@ -218,3 +218,84 @@ def get_feature_statistics(frames_list, **kwargs):
         'input_frames': len(frames_list),
         'processing_success': len(output_frames) > 0
     }
+
+from numpy.typing import NDArray
+import cv2
+
+def track_red_pixels_with_optical_flow(
+    frames: list[NDArray[np.uint8]],
+    red_bgr: tuple[int, int, int] = (0, 0, 255),
+    color_tolerance: int = 35,
+    max_corners: int = 30,
+    win_size: tuple[int, int] = (20, 20),
+    max_level: int = 2
+) -> list[NDArray[np.uint8]]:
+    output_frames = []
+    total_frames = len(frames)
+
+    lk_params = dict(winSize=win_size, maxLevel=max_level,
+                     criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+
+    # Convert first frame to gray and detect red pixels
+    prev_frame = frames[0]
+    prev_gray = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
+
+    # Red pixel mask
+    diff = cv2.absdiff(prev_frame, np.array(red_bgr, dtype=np.uint8))
+    red_mask = (np.linalg.norm(diff, axis=2) <= color_tolerance).astype(np.uint8) * 255
+
+    # Detect points in red regions
+    p0 = cv2.goodFeaturesToTrack(prev_gray, mask=red_mask, maxCorners=max_corners, qualityLevel=0.001, minDistance=5)
+
+    prev_velocities = np.zeros_like(p0) if p0 is not None else None
+
+    for i in range(1, total_frames):
+        frame = frames[i]
+        frame_display = frame.copy()
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        if p0 is None:
+            output_frames.append(frame_display)
+            continue
+
+        # Optical flow tracking
+        p1, st, err = cv2.calcOpticalFlowPyrLK(prev_gray, gray, p0, None, **lk_params)
+
+        if p1 is None:
+            output_frames.append(frame_display)
+            continue
+
+        good_new = p1[st == 1]
+        good_old = p0[st == 1]
+        old_velocities = prev_velocities[st == 1] if prev_velocities is not None else np.zeros_like(good_new)
+
+        for j, (new, old, old_vel) in enumerate(zip(good_new, good_old, old_velocities)):
+            x_new, y_new = new.ravel()
+            x_old, y_old = old.ravel()
+
+            # Speed vector
+            vx, vy = new - old
+            speed = np.linalg.norm([vx, vy])
+
+            # Acceleration vector
+            ax, ay = vx - old_vel[0], vy - old_vel[1]
+            acceleration = np.linalg.norm([ax, ay])
+
+            # Draw position and info
+            cv2.circle(frame_display, (int(x_new), int(y_new)), 4, (0, 255, 0), -1)
+            text = f"v={speed:.1f}, a={acceleration:.1f}"
+            cv2.putText(frame_display, text, (int(x_new + 5), int(y_new - 5)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+
+        output_frames.append(frame_display)
+
+        # Update
+        prev_gray = gray.copy()
+        p0 = good_new.reshape(-1, 1, 2)
+        prev_velocities = (good_new - good_old).reshape(-1, 1, 2)
+
+        progress = (i + 1) / total_frames * 100
+        print(f"Tracking Red w/ Optical Flow: Frame {i + 1}/{total_frames} ({progress:.1f}%)", end='\r')
+
+    print()
+    return output_frames

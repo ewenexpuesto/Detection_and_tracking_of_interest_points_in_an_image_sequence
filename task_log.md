@@ -36,6 +36,14 @@ Block matching (naive version) is way too slow
 
 Optical flow is way faster but maybe less efficient (probably not) than the block matching naive. It works well but a lot of noise
 
-difference of intensity of superpixels + cosegmentation : grouping superpixels together to layer the whole object and forget noise
+Applied two times in a row the difference of intensity of superpixels algorithm : first time as before, then we remove all colors from the video except the one that the algorithm highlighted. This way we get an almost full black video. Then by applying the difference of intensity of superpixels algorithm but with bigger superpixels, we get a bit less noise, but it doesn't seem it is worth the hassle.
 
-Ou appliquer deux fois l'algorithme, mais en supprimant tout ce qui nest pas extrême
+## Lundi 30/06
+
+Difference of intensity of superpixels + cosegmentation : grouping superpixels together to layer the whole object and forget noise
+
+Using kmeans after the difference of intensity of superpixels ? Très long et échec avec k=2.
+
+Using a local color propagation algorithm to propagate the highlighted pixels so that they form more of an object rather than independant pixels
+
+Optical flow works better when you tell it to follow a red dot than when you tell it nothing
