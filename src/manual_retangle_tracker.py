@@ -55,10 +55,10 @@ def manual_rectangle_tracker(
     print()
     return output_frames
 
-def advanced_rectangle_tracker(
+def CSRT_rectangle_tracker(
     frames: list[NDArray[np.uint8]],
     start_pos: tuple[int, int],
-    box_size: tuple[int, int] = (120, 70)
+    box_size: tuple[int, int] = (0, 0)
 ) -> list[NDArray[np.uint8]]:
     """
     Tracks a rectangle across video frames, robust to scale and rotation using CSRT tracker.

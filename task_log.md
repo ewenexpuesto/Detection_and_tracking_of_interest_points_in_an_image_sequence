@@ -47,3 +47,13 @@ Using kmeans after the difference of intensity of superpixels ? Très long et é
 Using a local color propagation algorithm to propagate the highlighted pixels so that they form more of an object rather than independant pixels
 
 Optical flow works better when you tell it to follow a red dot than when you tell it nothing
+
+Tried a manual tracker inputing a point and a rectangle size : the tracker often confuses the car with the sky when the car moves away
+
+Then I implemented a CSRT that takes into account a spatial dimension and expects the object to move. It is manual feature matching.
+
+## Mardi 31/06
+
+Implemented manual tracking selection, with a user interface that allows the user to select a rectangle of what to follow. Then this draws a bright green rectangle around the object.
+
+Then I used optical flow to follow the object, compute its center, and the position/velocity/acceleration and to input it in a csv file (log). Et affichage de la trajectoire

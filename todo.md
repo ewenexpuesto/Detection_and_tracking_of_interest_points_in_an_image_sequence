@@ -1,10 +1,12 @@
 # Todo
 
-* [ ] Ajouter des références
 * [ ] Utiliser le GPU ? NumPy ne fonctionne que sur le CPU mais pour OpenCV on peut le rendre utilisable par le GPU. Mais la combinaison des deux ne peut pas fonctionner avec le GPU
-* [ ] Ajouter des exemples de vidéos et de résultats dans le git, comme je l'ai promis dans le README
-* [ ] See report.md for more ideas
-* [ ] Template matching on the red car that moves ?
+* [ ] UI to optimize the parameters, with real time video visualization
+* [ ] Documenter toutes les fonctions
+
+
+
+
 
 Pour la difference of intensity of superpixels :
 
