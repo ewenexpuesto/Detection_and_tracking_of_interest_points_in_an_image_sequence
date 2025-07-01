@@ -1,9 +1,8 @@
 # Todo
 
 * [ ] Utiliser le GPU ? NumPy ne fonctionne que sur le CPU mais pour OpenCV on peut le rendre utilisable par le GPU. Mais la combinaison des deux ne peut pas fonctionner avec le GPU
-* [ ] UI to optimize the parameters, with real time video visualization
+* [ ] UI to optimize the parameters, with real time visualization
 * [ ] Documenter toutes les fonctions
-
 
 
 
