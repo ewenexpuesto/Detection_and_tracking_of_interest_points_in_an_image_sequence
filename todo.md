@@ -4,9 +4,6 @@
 * [ ] UI to optimize the parameters, with real time visualization
 * [ ] Documenter toutes les fonctions
 
-
-
-
 Pour la difference of intensity of superpixels :
 
 * [ ] Possible d'ajouter une heuristique pour d'abord réduire le temps de calcul : tous les N frames (donné en argument), il regarde s'il y a un cluster de superpixels qui passe le threashold : regarde si pour chaque superpixel qui passe le threshold il y a au moins V voisins, avec V la taille du côté du carré auquel il faut regarder autour qui passent le threshold. Si oui, il focus sur eux et ne calcule l'intensité moyenne que pour ces superpixels et les V+W autour (carré)
