@@ -190,8 +190,7 @@ def list_of_arrays_to_jpgs(frames: list[NDArray[np.uint8]], folder_path: str, pr
 
 def linear_stretch_colors(frame: NDArray[np.uint8]) -> NDArray[np.uint8]:
     """
-    Linearly stretches pixel intensities in the input image so that the
-    minimum value becomes 0 and the maximum becomes 255.
+    Linearly stretches pixel intensities in the input image so that the minimum value becomes 0 and the maximum becomes 255.
 
     This enhances contrast by mapping the full input range to [0, 255].
 

@@ -4,7 +4,7 @@ from numpy.typing import NDArray
 
 def select_rectangle(frame: NDArray[np.uint8]) -> tuple[tuple[int, int], tuple[int, int]]:
     """
-    Allows the user to draw a rectangle on a frame using the mouse.
+    Allows the user to draw a rectangle on a frame.
     Returns the top-left position and size of the rectangle.
 
     Parameters

@@ -30,7 +30,7 @@ def block_matching_list_of_arrays(
     output_frames = []
     total_frames = len(frames)
 
-    for i in range(len(frames) - 1):
+    for i in range(total_frames - 1):
         frame1 = cv2.cvtColor(frames[i], cv2.COLOR_BGR2GRAY)
         frame2 = cv2.cvtColor(frames[i + 1], cv2.COLOR_BGR2GRAY)
         overlay = frames[i].copy()
@@ -54,7 +54,7 @@ def block_matching_list_of_arrays(
                                 min_diff = diff
                                 best_match = (dx, dy)
 
-                # Draw motion vector (arrow)
+                # Draw motion vector
                 start = (x + block_size // 2, y + block_size // 2)
                 end = (start[0] + best_match[0], start[1] + best_match[1])
                 cv2.arrowedLine(overlay, start, end, (0, 0, 255), 1, tipLength=0.3)
@@ -221,7 +221,8 @@ def track_red_pixels_with_optical_flow(
     for i in range(1, total_frames):
         time_sec = i * dt
         frame = frames[i]
-        frame_display = frame.copy()
+        # frame_display = frame.copy()
+        frame_display = frame # saves RAM
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         if p0 is None:
@@ -298,7 +299,6 @@ def track_red_pixels_with_optical_flow(
 
 
 import csv
-import os
 
 def optical_flow_rectangle(
     frames: list[NDArray[np.uint8]],
@@ -307,6 +307,31 @@ def optical_flow_rectangle(
     target_color: tuple[int, int, int] = (0, 255, 0),
     color_tolerance: int = 20
     ) -> list[NDArray[np.uint8]]:
+    """
+    Track a colored rectangular object in a sequence of frames using LK optical flow and log its position, velocity, and acceleration.
+
+    Parameters
+    ----------
+    frames : list of np.ndarray
+        Sequence of video frames (BGR images, dtype=uint8).
+    fps : float, optional
+        Frames per second of the video. Used to compute time, velocity, 
+        and acceleration. Default is 30.0.
+    log_path : str, optional
+        Path to the CSV log file storing position, velocity, and acceleration data. 
+        Default is "optical_flow_green_log.csv".
+    target_color : tuple of int, optional
+        BGR color of the object to track. Default is green ``(0, 255, 0)``.
+    color_tolerance : int, optional
+        Euclidean distance tolerance in color space for detecting the target 
+        object in the first frame. Default is 20.
+
+    Returns
+    -------
+    list of np.ndarray
+        List of processed frames with the trajectory, current position, 
+        velocity, and acceleration drawn.
+    """
     output_frames = []
     log_rows = [("Time (s)", "X", "Y", "Vx", "Vy", "Ax", "Ay")]
     trajectory_points = []

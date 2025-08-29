@@ -74,7 +74,7 @@ def keep_most_red_pixels(frames: list[NDArray[np.uint8]], p: float) -> list[NDAr
 
 def background_subtraction_list_of_arrays(frames: list[NDArray[np.uint8]]) -> list[NDArray[np.uint8]]:
     """
-    Applies background subtraction to highlight moving areas in each frame.
+    Applies background subtraction to highlight moving areas in each frame. low values are black → red → orange → yellow → white for high values
     """
     fgbg = cv2.createBackgroundSubtractorMOG2()
     output_frames = []

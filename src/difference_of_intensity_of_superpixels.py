@@ -83,9 +83,6 @@ def difference_of_intensity_of_superpixels_list_of_arrays(frames: NDArray[np.uin
     
     return processed_frames
 
-import numpy as np
-import cv2
-from numpy.typing import NDArray
 from typing import List
 
 def difference_of_intensity_superpixels_matrix(
@@ -94,7 +91,7 @@ def difference_of_intensity_superpixels_matrix(
     t: float = 0.1
 ) -> List[NDArray[np.uint8]]:
     """
-    Vectorized superpixel-based frame difference using matrix ops (no explicit loops over blocks).
+    Vectorized superpixel-based frame difference using matrix operations.
 
     Parameters
     ----------
@@ -119,8 +116,6 @@ def difference_of_intensity_superpixels_matrix(
     sp_w = max(1, int(w * p))
 
     # Generate superpixel ID matrix
-    num_blocks_y = (h + sp_h - 1) // sp_h
-    num_blocks_x = (w + sp_w - 1) // sp_w
     block_id = np.zeros((h, w), dtype=np.int32)
 
     block_idx = 0

@@ -54,7 +54,7 @@ This Gaussian blur step is used as a **preprocessing stage** before applying the
 
 This method consists in subtracting a **Gaussian-blurred image** from the original image. The blur is applied using a **Gaussian kernel**, which gives more weight to nearby pixels and less to distant ones.
 
-Blurring acts as a **low-pass filter** : it smooths the image by preserving low-frequency details and removing sharp changes. Subtracting the blurred version from the original keeps only the **high-frequency components**, such as edges and small details — this is called **Difference of Gaussians (DoG)**.
+Blurring acts as a **low-pass filter** : it smooths the image by preserving low-frequency details and removing sharp changes. Subtracting the blurred version from the original keeps only the **high-frequency components**, such as edges and small details, this is called **Difference of Gaussians (DoG)**.
 
 A higher $\sigma$ increases the blur, removing more detail. We use this method because the Gaussian is smooth, symmetric, and gives a natural weighting based on distance. It is applied before other processing steps.
 
@@ -128,7 +128,7 @@ The term $\log_2 p_i$ measures the **information content** (or **surprise**) of 
 
 ### Maximally stable extremal regions: accentuate contrast
 
-Each pixel is assigned to a class based on whether it falls within a certain **threshold**, effectively dividing the image into **two groups**. This method is **lightweight** and efficient. If nn is the number of pixels, the process can run in $O(n)$ time using a **binary thresholding** approach.
+Each pixel is assigned to a class based on whether it falls within a certain **threshold**, effectively dividing the image into **two groups**. This method is **lightweight** and efficient. If $n$ is the number of pixels, the process can run in $O(n)$ time using a **binary thresholding** approach.
 
 In some cases, the image can be **divided into a grid**, and the thresholding can be computed **locally** in each cell. This allows for **adaptive thresholding**, which is more effective when lighting conditions vary across the image.
 
@@ -282,7 +282,6 @@ The **CSRT tracker** (*Discriminative Correlation Filter with Channel and Spatia
 
 At the core of CSRT is the idea of  **correlation filtering**. A DCF learns a filter $f$ that, when convolved with the image, gives a strong peak where the object is located and low response elsewhere. This is typically done in the **Fourier domain** to speed up the convolution operation (since convolution becomes multiplication in the frequency domain).
 
-
 Unlike basic DCFs that use raw grayscale pixels, CSRT computes features from **multiple image channels** :
 
 * HoG (Histogram of Oriented Gradients)
@@ -290,7 +289,6 @@ Unlike basic DCFs that use raw grayscale pixels, CSRT computes features from **m
 * Intensity values (grayscale)
 
 Each channel contributes to the final response map, increasing the richness of the representation and improving robustness to lighting changes and background noise.
-
 
 A key innovation in CSRT is the introduction of a **spatial reliability map**. Not all pixels in the template are equally helpful for tracking (e.g., pixels near the object's edge or background can be misleading). CSRT computes a binary or continuous-valued spatial mask that weights the importance of each spatial location during training of the correlation filter.
 
