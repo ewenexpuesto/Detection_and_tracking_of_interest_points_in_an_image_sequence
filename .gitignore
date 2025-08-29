@@ -1,4 +1,4 @@
 input_videos/*
 output_videos/*
-output_frames/
 src/__pycache__/
+venv/
