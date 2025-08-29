@@ -138,6 +138,8 @@ This means the filter focuses more on reliable, central, object-specific regions
 
 The following summarizes the functions used in each video result and provides a rating of the outcome relative to the expected result. This makes it possible to reproduce the results.
 
+### Auto detection and tracking
+
 I used a first short video named `video_sample_1-uhd_3840_2160_25fps` to test my first algorithms.
 
 - `1_difference_of_gaussians_1.mp4` is made by separating the video into frames (`mp4_to_list_of_arrays`) and then computing the DoG for each frame with `difference_of_gaussians_list_of_arrays` with default parameters, then `linear_stretch_colors` and then patching the frames back together (`list_of_arrays_to_mp4`). Note: I won't mention the mp4 to frames and the frames to mp4 steps as they are redundant from now on.
@@ -160,10 +162,12 @@ Then I used `video_sample_3-1080p.mp4` and then ``video_sample_4-1080p.mp4`` bec
 - `4_saliency_heatmap.mp4` is built with `saliency_heatmap_list_of_arrays` but I did not make any use of it. I highlighted the most moving parts in `4_saliency_heatmap_most_red_0.00001.mp4`.
 - `4_track_red_pixel_with_optical_flow_from_cut_local_color_propagation_10_10_70_from_difference_of_intensity_of_superpixels_matrix_0.002_0.5.mp4` is the best I could get. It first applies ``difference_of_intensity_of_superpixels_matrix`` to the original video with parameters `0.002` and `0.5`. Then I manually cut it so that we can see the car as soon as the video starts (see `video_sample_5-1080p.mp4` for such a cut video). Otherwise the optical flow doesn't work. Then I applied `track_red_pixels_with_optical_flow` with default parameters which tracks specifically red pixels with ST corner detection and KB optical flow. This function also saves the positions to a log file (see function docstring)
 
-Then for **manual tracking**:
+### Manual detection and tracking
 
 - I used `select_rectangle` to draw a bright green rectangle around the object on the first frame so that the first frame is replaced with this new one. Then the best I could get is with `optical_flow_rectangle` applied to `CSRT_rectangle_tracker` which can track a rectangle of a defined size and origin (top left corner of the rectangle) as well as its center. Thus for the 2 functions to work together, you need to save the size and top left corner coordinates of the rectangle you want to follow. See the final results here `5_optical_flow_rectangle_from_CSRT_rectangle_tracker.mp4`.
 - I tried following the rectangle with a template matching technique as in the `manual_rectangle_tracker` function but the results were not so consistent and depended on the rectangle you chose.
+
+### YOLO
 
 Finally for **YOLO** pre-processing, I used `20250314_163308.mp4`:
 
